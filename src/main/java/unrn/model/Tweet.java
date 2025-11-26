@@ -1,33 +1,45 @@
 package unrn.model;
 
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "tweets")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "tipo", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorValue("TWEET")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class Tweet {
-    static final String ERROR_TEXTO_LONGITUD = "El texto del tweet debe tener entre 1 y 280 caracteres";
-    static final String ERROR_TWEET_NULL = "El tweet original no puede ser nulo";
-    static final String ERROR_RETWEET_PROPIO = "No se puede hacer retweet de un tweet propio";
+    public static final String ERROR_TEXTO_LONGITUD = "El texto del tweet debe tener entre 1 y 280 caracteres";
 
-    private final String texto;
-    private final Usuario autor;
-    private final Tweet tweetOriginal;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    // Constructor para tweet normal
+    @Column(length = 280, nullable = false)
+    private String texto;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "autor_username", referencedColumnName = "userName")
+    private Usuario autor;
+
+    @Column(nullable = false)
+    private LocalDateTime fecha;
+
     public Tweet(String texto, Usuario autor) {
-        assertTextoValido(texto);
+        if (this.getClass() == Tweet.class) {
+            assertTextoValido(texto);
+        }
         this.texto = texto;
         this.autor = autor;
-        this.tweetOriginal = null;
-    }
-
-    // Constructor privado para retweet
-    private Tweet(Tweet tweetOriginal, Usuario autor) {
-        assertTweetOriginalNoNull(tweetOriginal);
-        assertNoRetweetPropio(tweetOriginal, autor);
-        this.texto = tweetOriginal.texto;
-        this.autor = autor;
-        this.tweetOriginal = tweetOriginal;
-    }
-
-    public static Tweet retweet(Tweet tweetOriginal, Usuario autor) {
-        return new Tweet(tweetOriginal, autor);
+        this.fecha = LocalDateTime.now();
     }
 
     private void assertTextoValido(String texto) {
@@ -36,35 +48,27 @@ public class Tweet {
         }
     }
 
-    private void assertTweetOriginalNoNull(Tweet tweetOriginal) {
-        if (tweetOriginal == null) {
-            throw new RuntimeException(ERROR_TWEET_NULL);
-        }
-    }
-
-    private void assertNoRetweetPropio(Tweet tweetOriginal, Usuario autor) {
-        if (tweetOriginal.autor == autor) {
-            throw new RuntimeException(ERROR_RETWEET_PROPIO);
-        }
-    }
-
-    // Solo esta para probar en Main
-    public String texto() {
-        return texto;
-    }
-
-    // Solo esta para probar en Main
     public boolean esRetweet() {
-        return tweetOriginal != null;
+        return false;
     }
 
-    // Solo esta para probar en Main
-    public Tweet tweetOriginal() {
-        return tweetOriginal;
+    public String texto() {
+        return this.texto;
     }
 
-    // Solo esta para probar en Main
+    public String infoExtra() {
+        return "";
+    }
+
     public Usuario autor() {
-        return autor;
+        return this.autor;
+    }
+
+    public String userName() {
+        return this.autor.userName();
+    }
+
+    public LocalDateTime fecha() {
+        return this.fecha;
     }
 }

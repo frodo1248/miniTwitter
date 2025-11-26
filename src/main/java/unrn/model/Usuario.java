@@ -1,16 +1,30 @@
 package unrn.model;
 
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Entity
+@Table(name = "usuarios")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Usuario {
-    static final String ERROR_USERNAME_DUPLICADO = "Ya existe un usuario con ese userName";
-    static final String ERROR_USERNAME_LONGITUD = "El userName debe tener entre 5 y 25 caracteres";
-    static final String ERROR_USERNAME_NULL = "El userName no puede ser nulo";
+    public static final String ERROR_USERNAME_DUPLICADO = "Ya existe un usuario con ese userName";
+    public static final String ERROR_USERNAME_LONGITUD = "El userName debe tener entre 5 y 25 caracteres";
+    public static final String ERROR_USERNAME_NULL = "El userName no puede ser nulo";
 
-    private final String userName;
-    private final List<Tweet> tweets;
+    @Id
+    @Column(length = 25, nullable = false, unique = true)
+    private String userName;
+
+
+    @OneToMany(mappedBy = "autor", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Tweet> tweets = new ArrayList<>();
 
     public Usuario(String userName, List<Usuario> usuariosExistentes) {
         assertUserNameNoNull(userName);
@@ -26,7 +40,7 @@ public class Usuario {
     }
 
     public void retwittear(Tweet tweetOriginal) {
-        Tweet retweet = Tweet.retweet(tweetOriginal, this);
+        Retweet retweet = new Retweet(tweetOriginal, this);
         tweets.add(retweet);
     }
 
@@ -34,13 +48,12 @@ public class Usuario {
         return Collections.unmodifiableList(tweets);
     }
 
-    public void eliminar() {
-        tweets.clear();
+    public String userName() {
+        return this.userName;
     }
 
-    // Solo esta para probar en Main
-    public String userName() {
-        return userName;
+    public void eliminar() {
+        tweets.clear();
     }
 
     private void assertUserNameNoNull(String userName) {
@@ -50,6 +63,7 @@ public class Usuario {
     }
 
     private void assertUserNameLongitud(String userName) {
+        if (userName == null) return; // Dejar que la validación de nulo lo maneje
         if (userName.length() < 5 || userName.length() > 25) {
             throw new RuntimeException(ERROR_USERNAME_LONGITUD);
         }

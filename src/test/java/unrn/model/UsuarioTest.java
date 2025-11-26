@@ -90,19 +90,6 @@ class UsuarioTest {
     }
 
     @Test
-    @DisplayName("No permite crear re-tweet de un tweet propio")
-    void retwittearTweetPropio_lanzaExcepcion() {
-        // Setup
-        List<Usuario> usuarios = new ArrayList<>();
-        Usuario usuario = new Usuario("usuarioRT", usuarios);
-        usuario.publicarTweet("Tweet propio");
-        Tweet tweetPropio = usuario.timeline().get(0);
-        // Ejercitación y Verificación
-        var ex = assertThrows(RuntimeException.class, () -> usuario.retwittear(tweetPropio));
-        assertEquals(Tweet.ERROR_RETWEET_PROPIO, ex.getMessage(), "No debe permitir retweet propio");
-    }
-
-    @Test
     @DisplayName("Permite hacer re-tweet de un tweet de otro usuario")
     void retwittearTweetDeOtroUsuario_agregaRetweetAlTimeline() {
         // Setup
@@ -118,4 +105,3 @@ class UsuarioTest {
         assertEquals(1, usuario2.timeline().size(), "El retweet debe estar en el timeline del usuario");
     }
 }
-

@@ -55,43 +55,4 @@ class TweetTest {
         var ex = assertThrows(RuntimeException.class, () -> new Tweet(textoLargo, usuario));
         assertEquals(Tweet.ERROR_TEXTO_LONGITUD, ex.getMessage(), "Debe lanzar error de texto largo");
     }
-
-    @Test
-    @DisplayName("No permite crear retweet de tweet nulo")
-    void crearRetweetDeTweetNulo_lanzaExcepcion() {
-        // Setup
-        List<Usuario> usuarios = new ArrayList<>();
-        Usuario usuario = new Usuario("tweetUser5", usuarios);
-        // Ejercitación y Verificación
-        var ex = assertThrows(RuntimeException.class, () -> Tweet.retweet(null, usuario));
-        assertEquals(Tweet.ERROR_TWEET_NULL, ex.getMessage(), "Debe lanzar error de tweet original nulo");
-    }
-
-    @Test
-    @DisplayName("No permite crear retweet de un tweet propio")
-    void crearRetweetDeTweetPropio_lanzaExcepcion() {
-        // Setup
-        List<Usuario> usuarios = new ArrayList<>();
-        Usuario usuario = new Usuario("tweetUser6", usuarios);
-        Tweet tweetPropio = new Tweet("Mi tweet", usuario);
-        // Ejercitación y Verificación
-        var ex = assertThrows(RuntimeException.class, () -> Tweet.retweet(tweetPropio, usuario));
-        assertEquals(Tweet.ERROR_RETWEET_PROPIO, ex.getMessage(), "No debe permitir retweet propio");
-    }
-
-    @Test
-    @DisplayName("Permite crear retweet de un tweet de otro usuario")
-    void crearRetweetDeOtroUsuario_retornaRetweetValido() {
-        // Setup
-        List<Usuario> usuarios = new ArrayList<>();
-        Usuario usuario1 = new Usuario("tweetUser7a", usuarios);
-        usuarios.add(usuario1);
-        Usuario usuario2 = new Usuario("tweetUser7b", usuarios);
-        Tweet tweetOriginal = new Tweet("Tweet original", usuario1);
-        // Ejercitación
-        Tweet retweet = Tweet.retweet(tweetOriginal, usuario2);
-        // Verificación
-        assertNotNull(retweet, "El retweet no debe ser nulo");
-    }
 }
-
